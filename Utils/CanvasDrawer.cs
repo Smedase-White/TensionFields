@@ -9,9 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-using TensionFields.Utils;
-
-namespace TensionFields
+namespace TensionFields.Utils
 {
     public class CanvasDrawer
     {
@@ -53,21 +51,21 @@ namespace TensionFields
                         double? funcValue = func(getX(x), getY(y));
                         if (funcValue == null)
                         {
-                            *((int*)pBackBuffer) = 0;
+                            *(int*)pBackBuffer = 0;
                         }
                         else
                         {
                             double value = 255 / (1 + Math.Exp((-funcValue ?? 0) * 1000));
                             int color_data;
                             double red = 0, green = 0, blue = 0;
-                            if(value < 128)
+                            if (value < 128)
                             { green = 2 * value; blue = 255 - 2 * value; }
                             else
                             { red = 2 * (value - 128); green = 2 * (255 - value); }
                             color_data = (int)red << 16;
                             color_data |= (int)green << 8;
                             color_data |= (int)blue << 0;
-                            *((int*)pBackBuffer) = color_data;
+                            *(int*)pBackBuffer = color_data;
                         }
                         pBackBuffer += 4;
                     }
