@@ -24,30 +24,39 @@ namespace TensionFields
     /// </summary>
     public partial class MainWindow : Window
     {
-        private CanvasDrawer _drawer;
-        private CanvasDrawer _palette;
-
-        private Field[] field;
-        private Image[] fieldImages;
+        private Field[] _fields;
+        private ImageSource[] _fieldImageSources;
         private int _currentField;
 
         public MainWindow()
         {
             InitializeComponent();
-            field = new Field[0];
-            fieldImages = new Image[0];
+            _fields = Array.Empty<Field>();
+            _fieldImageSources = Array.Empty<ImageSource>();
             _currentField = 0;
-            _drawer = new CanvasDrawer(FieldImage);
-            _palette = new CanvasDrawer(Palette);
+            Palette.Source = PaintService.CreateImageFromFunction(
+                new Size(Palette.Width, Palette.Height),
+                (double x, double y) => x, 
+                new Point(-1, 0), new Size(2, 1),
+                -1, 1,
+                withStretch: true);
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
-                field = TextFileParser.Parse(openFileDialog.FileName);
+                _fields = TextFileParser.Parse(openFileDialog.FileName);
+            _fieldImageSources = new ImageSource[_fields.Length];
+            for (int f = 0; f < _fields.Length; f++)
+                _fieldImageSources[f] = PaintService.CreateImageFromFunction(
+                    new Size(FieldImage.Width, FieldImage.Height),
+                    _fields[f].GetValue, 
+                    new Point(_fields[f].MinR, _fields[f].MinZ), new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ),
+                    _fields[f].MinSI, _fields[f].MaxSI,
+                    graphShift: 0.05);
             _currentField = 0;
-            DrawField(field[_currentField]);
+            DrawField();
         }
 
         private void PrevTime(object sender, RoutedEventArgs e)
@@ -55,27 +64,23 @@ namespace TensionFields
             if (_currentField <= 0)
                 return;
             _currentField--;
-            DrawField(field[_currentField]);
+            DrawField();
         }
 
 
         private void NextTime(object sender, RoutedEventArgs e)
         {
-            if (_currentField >= field.Length - 1)
+            if (_currentField >= _fields.Length - 1)
                 return;
             _currentField++;
-            DrawField(field[_currentField]);
+            DrawField();
         }
 
-        public void DrawField(Field field)
+        public void DrawField()
         {
-            double maxShift = Math.Abs(field.MinSI);
-            if (Math.Abs(field.MaxSI) > maxShift)
-                maxShift = Math.Abs(field.MaxSI);
-            _drawer.Draw(field.GetValue, field.MinR, field.MinZ, (field.MaxR - field.MinR) * 1.05, (field.MaxZ - field.MinZ) * 1.05, -maxShift, maxShift, true);
-            _palette.Draw((double x, double y) => x * (field.MaxSI - field.MinSI), -1, 0, 2, 1, -maxShift, maxShift, false);
-            PaletteMinLabel.Content = $"{-maxShift:0.0000}";
-            PaletteMaxLabel.Content = $"{maxShift:0.0000}";
+            FieldImage.Source = _fieldImageSources[_currentField];
+            PaletteMinLabel.Content = $"{_fields[_currentField].MinSI:0.0000}";
+            PaletteMaxLabel.Content = $"{_fields[_currentField].MaxSI:0.0000}";
         }
     }
 }

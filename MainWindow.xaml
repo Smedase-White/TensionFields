@@ -22,19 +22,23 @@
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="65,45,0,0"
             Height="30" Width="50"
             Click="NextTime"/>
-        <Image x:Name="Palette"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,40,0,0"
-               Width="200" Height="50"/>
+        <Canvas
+            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,10,0,0"
+            Width="300" Height="60">
+            <Image x:Name="Palette"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,5,0,0"
+                   Width="200" Height="50"/>
+            <Label x:Name="PaletteMinLabel"
+               HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,10,0,0"
+               Width="50" Height="25" />
+            <Label x:Name="PaletteMaxLabel"
+               HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="145,10,0,0"
+               HorizontalContentAlignment="Right"
+               Width="50" Height="25" />
+        </Canvas>
         <Image x:Name="FieldImage"
                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,105,0,0"
                Width="700" Height="600"/>
-        <Label x:Name="PaletteMinLabel"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,10,0,0"
-               Width="50" Height="25" />
-        <Label x:Name="PaletteMaxLabel"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="360,10,0,0"
-               HorizontalContentAlignment="Right"
-               Width="50" Height="25" />
 
 
     </Grid>

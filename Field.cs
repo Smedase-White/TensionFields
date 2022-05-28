@@ -71,8 +71,32 @@ namespace TensionFields
         private bool PointInSeegment(double x, double y, int r, int z)
         {
             Point[] v = new Point[4] { _vertices[r, z], _vertices[r + 1, z], _vertices[r + 1, z + 1], _vertices[r, z + 1] };
-            return ((x >= v[0].X && x <= v[2].X && y >= v[0].Y && y <= v[2].Y) ||
-                (x >= v[2].X && x <= v[0].X && y >= v[2].Y && y <= v[0].Y));
+            return (x >= v[2].X && x <= v[0].X && y >= v[2].Y && y <= v[0].Y);
+        }
+
+        private (int, int)? FindSegment(double x, double y, int r, int z)
+        {
+            int N = _values.GetLength(0);
+            int M = _values.GetLength(1);
+            if (r < 0 || r >= N || z < 0 || z >= M)
+                return null;
+            if (PointInSeegment(x, y, r, z))
+                return (r, z);
+
+            Point[] v = new Point[4] { _vertices[r, z], _vertices[r + 1, z], _vertices[r + 1, z + 1], _vertices[r, z + 1] };
+            int shiftX = 0, shiftY = 0;
+
+            if (x <= v[1].X && x <= v[2].X)
+                shiftX = 1;
+            if (x >= v[0].X && x >= v[3].X)
+                shiftX = -1;
+
+            if (y <= v[2].Y && y <= v[3].Y)
+                shiftY = 1;
+            if (y >= v[0].Y && y >= v[1].Y)
+                shiftY = -1;
+
+            return FindSegment(x, y, r + shiftX, z + shiftY);
         }
 
         public double? GetValue(double x, double y)
@@ -80,11 +104,10 @@ namespace TensionFields
             int N = _values.GetLength(0);
             int M = _values.GetLength(1);
 
-            for (int r = 0; r < N; r++)
-                for (int z = 0; z < M; z++)
-                    if (PointInSeegment(x, y, r, z))
-                        return _values[r, z];
-            return null;
+            (int, int)? segment = FindSegment(x, y, N / 2, M / 2);
+            if (segment == null)
+                return null;
+            return _values[segment.Value.Item1, segment.Value.Item2];
         }
     }
 }
