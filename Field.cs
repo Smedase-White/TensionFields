@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +20,8 @@ namespace TensionFields
         public double MinR { get; private set; }
         public double MaxZ { get; private set; }
         public double MinZ { get; private set; }
+        public double MaxSI { get; private set; }
+        public double MinSI { get; private set; }
 
 
         public Field(int N, int M, double[] R, double[] Z, double[] SI)
@@ -42,12 +47,21 @@ namespace TensionFields
                     _vertices[r, z] = new Point(tempR, tempZ);
                 }
 
+            double tempSI;
             for (int r = 0; r < N - 1; r++)
                 for (int z = 0; z < M - 1; z++)
-                    _values[r, z] = SI[r * (M - 1) + z];
+                {
+                    tempSI = SI[r * (M - 1) + z];
+                    if (tempSI > MaxSI)
+                        MaxSI = tempSI;
+                    if (tempSI < MinSI)
+                        MinSI = tempSI;
+
+                    _values[r, z] = tempSI;
+                }
         }
 
-        public Field(double[,] R, double[,] Z, double[,] SI) :this(R.GetLength(0), R.GetLength(1), 
+        public Field(double[,] R, double[,] Z, double[,] SI) : this(R.GetLength(0), R.GetLength(1),
                  R.Cast<double>().ToArray(), Z.Cast<double>().ToArray(), SI.Cast<double>().ToArray())
         { }
 

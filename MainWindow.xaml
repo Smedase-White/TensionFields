@@ -5,17 +5,37 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TensionFields"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="900" Width="1500">
     <Grid>
         <Button
             Content="Открыть файл" 
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"
             Height="30" Width="100"
             Click="OpenFile"/>
+        <Button
+            Content="Пред." 
+            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,45,0,0"
+            Height="30" Width="50"
+            Click="PrevTime"/>
+        <Button
+            Content="След." 
+            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="65,45,0,0"
+            Height="30" Width="50"
+            Click="NextTime"/>
+        <Image x:Name="Palette"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,40,0,0"
+               Width="200" Height="50"/>
         <Image x:Name="FieldImage"
-                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,45,0,0"
-                Width="400" Height="300">
-        </Image>
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,105,0,0"
+               Width="700" Height="600"/>
+        <Label x:Name="PaletteMinLabel"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="210,10,0,0"
+               Width="50" Height="25" />
+        <Label x:Name="PaletteMaxLabel"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="360,10,0,0"
+               HorizontalContentAlignment="Right"
+               Width="50" Height="25" />
+
 
     </Grid>
 </Window>

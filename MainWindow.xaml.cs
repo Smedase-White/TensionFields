@@ -25,38 +25,57 @@ namespace TensionFields
     public partial class MainWindow : Window
     {
         private CanvasDrawer _drawer;
+        private CanvasDrawer _palette;
 
-        private Field field;
+        private Field[] field;
+        private Image[] fieldImages;
+        private int _currentField;
 
         public MainWindow()
         {
             InitializeComponent();
-            field = new Field(1, 1, new double[] { 0 }, new double[] { 0 }, new double[] { });
+            field = new Field[0];
+            fieldImages = new Image[0];
+            _currentField = 0;
             _drawer = new CanvasDrawer(FieldImage);
+            _palette = new CanvasDrawer(Palette);
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
-                field = TextFileParser.Parse(openFileDialog.FileName)[0];
-            _drawer.Draw(field.GetValue, field.MinR, field.MinZ, field.MaxR - field.MinR, field.MaxZ - field.MinZ);
+                field = TextFileParser.Parse(openFileDialog.FileName);
+            _currentField = 0;
+            DrawField(field[_currentField]);
+        }
+
+        private void PrevTime(object sender, RoutedEventArgs e)
+        {
+            if (_currentField <= 0)
+                return;
+            _currentField--;
+            DrawField(field[_currentField]);
+        }
+
+
+        private void NextTime(object sender, RoutedEventArgs e)
+        {
+            if (_currentField >= field.Length - 1)
+                return;
+            _currentField++;
+            DrawField(field[_currentField]);
         }
 
         public void DrawField(Field field)
         {
-            int N = field.Values.GetLength(0);
-            int M = field.Values.GetLength(1);
-            GeometryGroup polygons = new GeometryGroup();
-            for (int r = 0; r < N; r++)
-            {
-                for (int z = 0; z < M; z++)
-                {
-                    PathFigure figure = new PathFigure() { IsClosed = true, StartPoint = field.Vertices[r, z] };
-                    figure.Segments.Add(new LineSegment());
-                    polygons.Children.Add(new PathGeometry(new PathFigure[] { new PathFigure()}));
-                }
-            }
+            double maxShift = Math.Abs(field.MinSI);
+            if (Math.Abs(field.MaxSI) > maxShift)
+                maxShift = Math.Abs(field.MaxSI);
+            _drawer.Draw(field.GetValue, field.MinR, field.MinZ, (field.MaxR - field.MinR) * 1.05, (field.MaxZ - field.MinZ) * 1.05, -maxShift, maxShift, true);
+            _palette.Draw((double x, double y) => x * (field.MaxSI - field.MinSI), -1, 0, 2, 1, -maxShift, maxShift, false);
+            PaletteMinLabel.Content = $"{-maxShift:0.0000}";
+            PaletteMaxLabel.Content = $"{maxShift:0.0000}";
         }
     }
 }
