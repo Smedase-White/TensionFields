@@ -9,30 +9,30 @@
   },
   "packageFolders": {
     "C:\\Users\\watei\\.nuget\\packages\\": {},
-    "B:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\watei\\source\\repos\\TensionFields\\TensionFields\\TensionFields.csproj",
+      "projectUniqueName": "D:\\repos\\TensionFields\\TensionFields\\TensionFields.csproj",
       "projectName": "TensionFields",
-      "projectPath": "C:\\Users\\watei\\source\\repos\\TensionFields\\TensionFields\\TensionFields.csproj",
+      "projectPath": "D:\\repos\\TensionFields\\TensionFields\\TensionFields.csproj",
       "packagesPath": "C:\\Users\\watei\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\watei\\source\\repos\\TensionFields\\TensionFields\\obj\\",
+      "outputPath": "D:\\repos\\TensionFields\\TensionFields\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "B:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "B:\\Smedase\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "B:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "B:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\watei\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net6.0-windows7.0"
       ],
       "sources": {
-        "B:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -68,7 +68,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "B:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }
