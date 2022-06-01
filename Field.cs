@@ -71,9 +71,12 @@ namespace TensionFields
         private bool PointInSeegment(double x, double y, int r, int z)
         {
             Point[] v = new Point[4] { _vertices[r, z], _vertices[r + 1, z], _vertices[r + 1, z + 1], _vertices[r, z + 1] };
-            return (x >= v[2].X && x <= v[0].X && y >= v[2].Y && y <= v[0].Y);
+            //return (x >= v[2].X && x <= v[0].X && y >= v[2].Y && y <= v[0].Y);
+            double d = (v[3].X - v[2].X) * (v[1].Y - v[2].Y) - (v[1].X - v[2].X) * (v[3].Y - v[2].Y);
+            double dx = ((v[1].Y - v[2].Y) * (x - v[2].X) - (v[1].X - v[2].X) * (y - v[2].Y)) / d;
+            double dy = (-(v[3].Y - v[2].Y) * (x - v[2].X) + (v[3].X - v[2].X) * (y - v[2].Y)) / d;
+            return (0 <= dx) && (dx <= 1) && (0 <= dy) && (dy <= 1);
         }
-
         private (int, int)? FindSegment(double x, double y, int r, int z)
         {
             int N = _values.GetLength(0);
