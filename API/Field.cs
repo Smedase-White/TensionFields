@@ -13,11 +13,12 @@ namespace TensionFields.API
 
         public double MaxR { get; private set; }
         public double MinR { get; private set; }
+
         public double MaxZ { get; private set; }
         public double MinZ { get; private set; }
+
         public double MaxSI { get; private set; }
         public double MinSI { get; private set; }
-
 
         public Field(int N, int M, double[] R, double[] Z, double[] SI)
         {
@@ -59,8 +60,9 @@ namespace TensionFields.API
                  R.Cast<double>().ToArray(), Z.Cast<double>().ToArray(), SI.Cast<double>().ToArray())
         { }
 
+        public Segment[,] Segments { get => _segments; }
         //public Point[,] Vertices { get => _vertices; }
-       // public double[,] Values { get => _values; }
+        //public double[,] Values { get => _values; }
 
         private (int, int)? FindSegment(double x, double y, int r, int z)
         {
@@ -90,6 +92,9 @@ namespace TensionFields.API
 
         public double? GetValue(double x, double y)
         {
+            if ((x < MinR || x > MaxR) || (y < MinZ || y > MaxZ))
+                return null;
+
             int N = _segments.GetLength(0);
             int M = _segments.GetLength(1);
 

@@ -24,6 +24,8 @@ namespace TensionFields.API
             _function = func;
         }
 
+        public Segment(double value, params Point[] vertices) : this((double x, double y) => value, vertices) { }
+
         public Point RightTop { get => _vertices[0]; private set => _vertices[0] = value; }
         public Point LeftTop { get => _vertices[1]; private set => _vertices[1] = value; }
         public Point LeftBottom { get => _vertices[2]; private set => _vertices[2] = value; }
@@ -33,8 +35,6 @@ namespace TensionFields.API
         public Vector Right { get => RightTop - RightBottom; }
         public Vector Top { get => LeftTop - RightTop; }
         public Vector Left { get => LeftBottom - LeftTop; }
-
-        public Segment(double value, params Point[] vertices) : this((double x, double y) => value, vertices) { }
 
         public bool HasPoint(double x, double y)
         {
