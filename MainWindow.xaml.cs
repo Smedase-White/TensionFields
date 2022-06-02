@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using TensionFields.Utils;
+using TensionFields.API;
 
 namespace TensionFields
 {
@@ -54,7 +55,7 @@ namespace TensionFields
                     _fields[f].GetValue, 
                     new Point(_fields[f].MinR, _fields[f].MinZ), new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ),
                     _fields[f].MinSI, _fields[f].MaxSI,
-                    graphShift: 0.05);
+                    graphShift: -0.05);
             _currentField = 0;
             DrawField();
         }

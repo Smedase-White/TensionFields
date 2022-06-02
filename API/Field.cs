@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using System.Windows;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TensionFields
+namespace TensionFields.API
 {
-
     public class Field
     {
-        private readonly Point[,] _vertices;
-        private readonly double[,] _values;
+        private readonly Segment[,] _segments;
 
         public double MaxR { get; private set; }
         public double MinR { get; private set; }
@@ -26,8 +21,8 @@ namespace TensionFields
 
         public Field(int N, int M, double[] R, double[] Z, double[] SI)
         {
-            _vertices = new Point[N, M];
-            _values = new double[N - 1, M - 1];
+            Point[,] vertices = new Point[N, M];
+            _segments = new Segment[N - 1, M - 1];
 
             double tempR, tempZ;
             for (int r = 0; r < N; r++)
@@ -43,8 +38,7 @@ namespace TensionFields
                         MaxZ = tempZ;
                     if (tempZ < MinZ)
                         MinZ = tempZ;
-
-                    _vertices[r, z] = new Point(tempR, tempZ);
+                    vertices[r, z] = new Point(tempR, tempZ);
                 }
 
             double tempSI;
@@ -57,7 +51,7 @@ namespace TensionFields
                     if (tempSI < MinSI)
                         MinSI = tempSI;
 
-                    _values[r, z] = tempSI;
+                    _segments[r, z] = new Segment(tempSI, vertices[r, z], vertices[r + 1, z], vertices[r + 1, z + 1], vertices[r, z + 1]);
                 }
         }
 
@@ -65,38 +59,30 @@ namespace TensionFields
                  R.Cast<double>().ToArray(), Z.Cast<double>().ToArray(), SI.Cast<double>().ToArray())
         { }
 
-        public Point[,] Vertices { get => _vertices; }
-        public double[,] Values { get => _values; }
+        //public Point[,] Vertices { get => _vertices; }
+       // public double[,] Values { get => _values; }
 
-        private bool PointInSeegment(double x, double y, int r, int z)
-        {
-            Point[] v = new Point[4] { _vertices[r, z], _vertices[r + 1, z], _vertices[r + 1, z + 1], _vertices[r, z + 1] };
-            //return (x >= v[2].X && x <= v[0].X && y >= v[2].Y && y <= v[0].Y);
-            double d = (v[3].X - v[2].X) * (v[1].Y - v[2].Y) - (v[1].X - v[2].X) * (v[3].Y - v[2].Y);
-            double dx = ((v[1].Y - v[2].Y) * (x - v[2].X) - (v[1].X - v[2].X) * (y - v[2].Y)) / d;
-            double dy = (-(v[3].Y - v[2].Y) * (x - v[2].X) + (v[3].X - v[2].X) * (y - v[2].Y)) / d;
-            return (0 <= dx) && (dx <= 1) && (0 <= dy) && (dy <= 1);
-        }
         private (int, int)? FindSegment(double x, double y, int r, int z)
         {
-            int N = _values.GetLength(0);
-            int M = _values.GetLength(1);
+            int N = _segments.GetLength(0);
+            int M = _segments.GetLength(1);
             if (r < 0 || r >= N || z < 0 || z >= M)
                 return null;
-            if (PointInSeegment(x, y, r, z))
+
+            Segment s = _segments[r, z];
+            if (s.HasPoint(x, y))
                 return (r, z);
 
-            Point[] v = new Point[4] { _vertices[r, z], _vertices[r + 1, z], _vertices[r + 1, z + 1], _vertices[r, z + 1] };
             int shiftX = 0, shiftY = 0;
 
-            if (x <= v[1].X && x <= v[2].X)
+            if (x < s.LeftBottom.X || x < s.LeftTop.X)
                 shiftX = 1;
-            if (x >= v[0].X && x >= v[3].X)
+            if (x > s.RightBottom.X || x > s.RightTop.X)
                 shiftX = -1;
 
-            if (y <= v[2].Y && y <= v[3].Y)
+            if (y < s.LeftBottom.Y || y < s.RightBottom.Y)
                 shiftY = 1;
-            if (y >= v[0].Y && y >= v[1].Y)
+            if (y > s.LeftTop.Y || y > s.RightTop.Y)
                 shiftY = -1;
 
             return FindSegment(x, y, r + shiftX, z + shiftY);
@@ -104,13 +90,16 @@ namespace TensionFields
 
         public double? GetValue(double x, double y)
         {
-            int N = _values.GetLength(0);
-            int M = _values.GetLength(1);
+            int N = _segments.GetLength(0);
+            int M = _segments.GetLength(1);
 
-            (int, int)? segment = FindSegment(x, y, N / 2, M / 2);
+            double xp = (x - MinR) / (MaxR - MinR);
+            double yp = (y - MinZ) / (MaxZ - MinZ);
+
+            (int, int)? segment = FindSegment(x, y, (int)(N * xp), (int)(M * yp));
             if (segment == null)
                 return null;
-            return _values[segment.Value.Item1, segment.Value.Item2];
+            return _segments[segment.Value.Item1, segment.Value.Item2].GetValue(x, y);
         }
     }
 }
