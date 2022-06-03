@@ -27,7 +27,10 @@ namespace TensionFields
     {
         private Field[] _fields;
         private ImageSource[] _fieldImageSources;
+        private List<Line>[] _grids; 
         private int _currentField;
+
+        private (double, double)[] _valuesIntervals;
 
         public MainWindow()
         {
@@ -38,7 +41,7 @@ namespace TensionFields
             Palette.Source = PaintService.CreateImageFromFunction(
                 new Size(Palette.Width, Palette.Height),
                 (double x, double y) => x, 
-                new Point(-1, 0), new Size(2, 1),
+                new Size(2, 1), new Point(-1, 0),
                 -1, 1,
                 withStretch: true);
         }
@@ -48,14 +51,66 @@ namespace TensionFields
             OpenFileDialog openFileDialog = new OpenFileDialog();
             if (openFileDialog.ShowDialog() == true)
                 _fields = TextFileParser.Parse(openFileDialog.FileName);
+
+            if (GridCheckBox.IsChecked == true)
+                HideGrid();
+
+
             _fieldImageSources = new ImageSource[_fields.Length];
+            _grids = new List<Line>[_fields.Length];
+            _valuesIntervals = new (double, double)[_fields.Length];
+
+            if (SameCheckBox.IsChecked == true)
+            {
+                (double, double) sameInterval = (_fields[0].MinSI, _fields[0].MaxSI);
+                for (int f = 1; f < _fields.Length; f++)
+                    sameInterval = (Math.Min(sameInterval.Item1, _fields[f].MinSI), Math.Max(sameInterval.Item2, _fields[f].MaxSI));
+                if (ColorCheckBox.IsChecked == true)
+                {
+                    double max = Math.Max(Math.Abs(sameInterval.Item1), Math.Abs(sameInterval.Item2));
+                    sameInterval = (-max, max);
+                }
+                for (int f = 0; f < _fields.Length; f++)
+                    _valuesIntervals[f] = sameInterval;
+            }
+            else
+            {
+                if (ColorCheckBox.IsChecked == true)
+                {
+                    for (int f = 0; f < _fields.Length; f++)
+                    {
+                        double max = Math.Max(Math.Abs(_fields[f].MinSI), Math.Abs(_fields[f].MaxSI));
+                        _valuesIntervals[f] = (-max, max);
+                    }
+                }
+                else
+                {
+                    for (int f = 0; f < _fields.Length; f++)
+                    {
+                        _valuesIntervals[f] = (_fields[f].MinSI, _fields[f].MaxSI);
+                    }
+                }
+            }
+
             for (int f = 0; f < _fields.Length; f++)
+            {
+
                 _fieldImageSources[f] = PaintService.CreateImageFromFunction(
                     new Size(FieldImage.Width, FieldImage.Height),
-                    _fields[f].GetValue, 
-                    new Point(_fields[f].MinR, _fields[f].MinZ), new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ),
-                    _fields[f].MinSI, _fields[f].MaxSI,
-                    graphShift: -0.05);
+                    _fields[f].GetValue,
+                    new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ), new Point(_fields[f].MinR, _fields[f].MinZ),
+                    _valuesIntervals[f].Item1, _valuesIntervals[f].Item2,
+                    withStretch: StretchCheckBox.IsChecked);
+
+                _grids[f] = PaintService.CreateBorders(
+                    new Size(FieldImage.Width, FieldImage.Height),
+                    new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ), new Point(_fields[f].MinR, _fields[f].MinZ),
+                    _fields[f].Vertices,
+                    withStretch: StretchCheckBox.IsChecked);
+
+                foreach (Line line in _grids[f])
+                    FieldCanvas.Children.Add(line);
+            }
             _currentField = 0;
             DrawField();
         }
@@ -64,6 +119,8 @@ namespace TensionFields
         {
             if (_currentField <= 0)
                 return;
+            if (GridCheckBox.IsChecked == true)
+                HideGrid();
             _currentField--;
             DrawField();
         }
@@ -73,6 +130,8 @@ namespace TensionFields
         {
             if (_currentField >= _fields.Length - 1)
                 return;
+            if (GridCheckBox.IsChecked == true)
+                HideGrid();
             _currentField++;
             DrawField();
         }
@@ -80,8 +139,38 @@ namespace TensionFields
         public void DrawField()
         {
             FieldImage.Source = _fieldImageSources[_currentField];
-            PaletteMinLabel.Content = $"{_fields[_currentField].MinSI:0.0000}";
-            PaletteMaxLabel.Content = $"{_fields[_currentField].MaxSI:0.0000}";
+
+            PaletteMinLabel.Content = $"{_valuesIntervals[_currentField].Item1:0.0000}";
+            PaletteMaxLabel.Content = $"{_valuesIntervals[_currentField].Item2:0.0000}";
+
+            if (GridCheckBox.IsChecked == true)
+                ShowGrid();
+        }
+
+        private void ShowGrid()
+        {
+            if (_grids == null)
+                return;
+            List<Line> lines = _grids[_currentField];
+            foreach (Line line in lines)
+                line.Visibility = Visibility.Visible;
+        }
+
+        private void HideGrid()
+        {
+            if (_grids == null)
+                return;
+            List<Line> lines = _grids[_currentField];
+            foreach (Line line in lines)
+                line.Visibility = Visibility.Hidden;
+        }
+
+        private void GridCheck(object sender, RoutedEventArgs e)
+        {
+            if (GridCheckBox.IsChecked == true)
+                ShowGrid();
+            else
+                HideGrid();
         }
     }
 }

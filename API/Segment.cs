@@ -36,29 +36,64 @@ namespace TensionFields.API
         public Vector Top { get => LeftTop - RightTop; }
         public Vector Left { get => LeftBottom - LeftTop; }
 
+        public bool IsRightOfRight(double x, double y) => CalcSide(x, y, 0) > 0;
+        public bool IsAboveTop(double x, double y) => CalcSide(x, y, 1) > 0;
+        public bool IsLeftOfLeft(double x, double y) => CalcSide(x, y, 2) > 0;
+        public bool IsBellowBottom(double x, double y) => CalcSide(x, y, 3) > 0;
+
         public bool HasPoint(double x, double y)
         {
-            /*double d = Right.X * Top.Y - Top.X * Right.Y;
+            /*
+            double d = Right.X * Top.Y - Top.X * Right.Y;
             double dx = (Right.X * (y - RightTop.Y) - (x - RightTop.X) * Right.Y) / d;
             double dy = (Top.X * (y - RightTop.Y) - (x - RightTop.X) * Top.Y) / d;
-            return 0 <= dx && dx <= 1 && 0 <= dy && dy <= 1;*/
+            return 0 <= dx && dx <= 1 && 0 <= dy && dy <= 1;
+            */
 
-            bool result = false;
-            int j = 3;
+            /*
             for (int i = 0; i < 4; i++)
-            {
-                if ((_vertices[i].Y < y && _vertices[j].Y >= y || _vertices[j].Y < y && _vertices[i].Y >= y) &&
-                    (_vertices[i].X + (y - _vertices[i].Y) / (_vertices[j].Y - _vertices[i].Y) * (_vertices[j].X - _vertices[i].X) < x))
-                    result = !result;
-                j = i;
-            }
-            return result;
+                if (x == _vertices[i].X && y == _vertices[i].Y)
+                    return true;
+            
+            int result = 0;
+            for (int i = 0; i < 4; i++)
+                result += IsIntersectLine(x, y, i) ? 1 : 0;
+            return result % 2 == 1;
+            */
+
+
+            for (int i = 0; i < 4; i++)
+                if (CalcSide(x, y, i) > 0)
+                    return false;
+            return true;
+        }
+
+        private double CalcSide(double x, double y, int i)
+        {
+            int j = (i + 3) % 4;
+            return (x - _vertices[j].X) * (_vertices[i].Y - _vertices[j].Y) - (y - _vertices[j].Y) * (_vertices[i].X - _vertices[j].X);
+        }
+
+        private bool IsIntersectLine(double x, double y, int i)
+        {
+            int j = (i + 3) % 4;
+
+            bool isBetweenY = (_vertices[i].Y < y && y <= _vertices[j].Y) || (_vertices[j].Y < y && y <= _vertices[i].Y);
+            if (isBetweenY == false)
+                return false;
+
+            bool isHorizontalLine = _vertices[i].Y == _vertices[j].Y;
+            if (isHorizontalLine == true)
+                return false;
+
+            double intersection = _vertices[i].X + (y - _vertices[i].Y) * (_vertices[j].X - _vertices[i].X) / (_vertices[j].Y - _vertices[i].Y);
+            return intersection < x;
         }
 
         public double? GetValue(double x, double y)
         {
-            if (HasPoint(x, y) == false)
-                return null;
+            /*if (HasPoint(x, y) == false)
+                return null;*/
             return _function(x, y);
         }
     }
