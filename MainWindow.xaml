@@ -5,23 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TensionFields"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1000" Width="850">
+        Title="MainWindow" Width="850" Height="800">
     <Grid>
         <Button
             Content="Открыть файл" 
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"
             Height="30" Width="105"
-            Click="OpenFile"/>
+            Click="OpenFile" Background="#FFCEF9F6"/>
         <Button
             Content="Пред." 
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,45,0,0"
             Height="30" Width="50"
-            Click="PrevTime"/>
+            Click="PrevTime" Background="#FFCEF9F6"/>
         <Button
             Content="След." 
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="65,45,0,0"
             Height="30" Width="50"
-            Click="NextTime"/>
+            Click="NextTime" Background="#FFCEF9F6"/>
         <Canvas
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="120,10,0,0"
             Width="300" Height="65">
@@ -39,16 +39,28 @@
         <GroupBox
             Header="График"
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,80,0,0"
-            Width="810" Height="810">
+            Width="810" Height="610">
             <Canvas x:Name="FieldCanvas"
-                Width="800" Height="780">
+                Width="800" Height="580" Margin="-3,0,1,0">
                 <Image x:Name="FieldImage"
-                   Width="800" Height="780"/>
+                   Width="800" Height="580"/>
             </Canvas>
         </GroupBox>
         <CheckBox x:Name="GridCheckBox"
-            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,10,0,0"
-            Content="Отоброжать сетку" Click="GridCheck"/>
+                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,10,0,0"
+                  Content="Отоброжать сетку" Click="GridCheck"/>
+        <TextBox x:Name="Scale"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,30,0,0" 
+                 Width="105" Height="20"
+                 TextWrapping="Wrap" Text="1"/>
+        <TextBox x:Name="PosX"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,55,0,0" 
+                 Width="50" Height="20"
+                 TextWrapping="Wrap" Text="0"/>
+        <TextBox x:Name="PosY"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,55,0,0" 
+                 Width="50" Height="20"
+                 TextWrapping="Wrap" Text="0"/>
         <CheckBox x:Name="StretchCheckBox"
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="600,10,0,0"
             Content="Растягивать график" Click="GridCheck"/>

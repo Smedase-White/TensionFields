@@ -29,19 +29,26 @@ namespace TensionFields.Utils
             {
                 T = TryFindValue<double>(ref stream);
                 stream.ReadLine();
-                R = ReadArray(ref stream, N * M);
+                R = ReadArray(ref stream, (N + 1) * (M + 1));
                 stream.ReadLine();
-                Z = ReadArray(ref stream, N * M);
+                Z = ReadArray(ref stream, (N + 1) * (M + 1));
                 stream.ReadLine();
-                SI = ReadArray(ref stream, (N - 1) * (M - 1));
+                SI = ReadArray(ref stream, N * M);
                 fields[kt] = new Field(N, M, R, Z, SI);
             }
             return fields;
         }
 
+        private static string GetLine(ref StreamReader stream)
+        {
+            string line = stream.ReadLine() ?? "0";
+            while (line.Length == 0)
+                line = stream.ReadLine() ?? "0";
+            return line;
+        }
         private static T FindProperty<T>(ref StreamReader stream, string propertyName)
         {
-            string line = stream.ReadLine() ?? "";
+            string line = GetLine(ref stream);
             string[] subs = line.Split($"{propertyName}=");
             subs = subs[1].Split(" ");
             return (T)Convert.ChangeType(subs[0], typeof(T), CultureInfo.InvariantCulture);
@@ -49,7 +56,7 @@ namespace TensionFields.Utils
 
         private static T TryFindValue<T>(ref StreamReader stream)
         {
-            string line = stream.ReadLine() ?? "";
+            string line = GetLine(ref stream);
             for (int start = 0; start < line.Length; start++)
             {
                 if (Char.IsDigit(line[start]) == false)
@@ -75,7 +82,7 @@ namespace TensionFields.Utils
             int c = 0;
             while (c < count)
             {
-                string line = stream?.ReadLine() ?? "";
+                string line = GetLine(ref stream);
                 string[] subs = line.Split(" ");
                 for (int v = 0; v < subs.Length; v++)
                 {

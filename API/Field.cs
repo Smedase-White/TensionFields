@@ -12,6 +12,8 @@ namespace TensionFields.API
         private readonly Point[,] _vertices;
         private readonly Segment[,] _segments;
 
+        private readonly int _N, _M;
+
         public double MaxR { get; private set; }
         public double MinR { get; private set; }
 
@@ -23,15 +25,18 @@ namespace TensionFields.API
 
         public Field(int N, int M, double[] R, double[] Z, double[] SI)
         {
-            _vertices = new Point[N, M];
-            _segments = new Segment[N - 1, M - 1];
+            _N = N;
+            _M = M;
+
+            _vertices = new Point[N + 1, M + 1];
+            _segments = new Segment[N, M];
 
             double tempR, tempZ;
-            for (int r = 0; r < N; r++)
-                for (int z = 0; z < M; z++)
+            for (int r = 0; r < N + 1; r++)
+                for (int z = 0; z < M + 1; z++)
                 {
-                    tempR = R[r * M + z];
-                    tempZ = Z[r * M + z];
+                    tempR = R[r * (M + 1) + z];
+                    tempZ = Z[r * (M + 1) + z];
                     if (tempR > MaxR)
                         MaxR = tempR;
                     if (tempR < MinR)
@@ -44,10 +49,10 @@ namespace TensionFields.API
                 }
 
             double tempSI;
-            for (int r = 0; r < N - 1; r++)
-                for (int z = 0; z < M - 1; z++)
+            for (int r = 0; r < N; r++)
+                for (int z = 0; z < M; z++)
                 {
-                    tempSI = SI[r * (M - 1) + z];
+                    tempSI = SI[r * M + z];
                     if (tempSI > MaxSI)
                         MaxSI = tempSI;
                     if (tempSI < MinSI)
@@ -67,10 +72,7 @@ namespace TensionFields.API
 
         private (int, int)? FindSegment(double x, double y, int r, int z)
         {
-            int N = _segments.GetLength(0);
-            int M = _segments.GetLength(1);
-
-            if (r < 0 || r >= N || z < 0 || z >= M)
+            if (r < 0 || r >= _N || z < 0 || z >= _M)
                 return null;
 
             Segment s = _segments[r, z];
@@ -91,17 +93,16 @@ namespace TensionFields.API
 
             r += shiftX;
             z += shiftY;
-            if (r < 0 || r >= N)
+            if (r < 0 || r >= _N)
             {
                 r -= shiftX;
                 shiftX = 0;
             }
-            if (z < 0 || z >= M)
+            if (z < 0 || z >= _M)
             {
                 z -= shiftY;
                 shiftY = 0;
             }
-
 
             if (shiftX == 0 && shiftY == 0)
                 return null;
@@ -114,16 +115,10 @@ namespace TensionFields.API
             if ((x < MinR || x > MaxR) || (y < MinZ || y > MaxZ))
                 return null;
 
-            int N = _segments.GetLength(0);
-            int M = _segments.GetLength(1);
-
             double xp = 1 - (x - MinR) / (MaxR - MinR);
             double yp = 1 - (y - MinZ) / (MaxZ - MinZ);
 
-            if (x == 0.6765 && y == 2.882326825)
-                xp = xp;
-
-            (int, int)? segment = FindSegment(x, y, (int)((N - 1) * xp), (int)((M - 1) * yp));
+            (int, int)? segment = FindSegment(x, y, (int)((_N - 1) * xp), (int)((_M - 1) * yp));
             if (segment == null)
                 return null;
             return _segments[segment.Value.Item1, segment.Value.Item2].GetValue(x, y);

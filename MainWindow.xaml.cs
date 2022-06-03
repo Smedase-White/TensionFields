@@ -44,6 +44,14 @@ namespace TensionFields
                 new Size(2, 1), new Point(-1, 0),
                 -1, 1,
                 withStretch: true);
+            try
+            {
+                FieldImage.Source = new BitmapImage(new Uri("C:\\Users\\watei\\Downloads\\smeshariki.jpeg"));
+            }
+            catch
+            {
+                
+            }
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)
@@ -92,19 +100,32 @@ namespace TensionFields
                 }
             }
 
+            double scale = Convert.ToDouble(Scale.Text);
+            double posX = Convert.ToDouble(PosX.Text);
+            double posY = Convert.ToDouble(PosY.Text);
+
             for (int f = 0; f < _fields.Length; f++)
             {
+
+                /*_fieldImageSources[f] = PaintService.CreateImageFromFunction(
+                    new Size(FieldImage.Width, FieldImage.Height),
+                    _fields[f].GetValue,
+                    new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ), new Point(_fields[f].MinR, _fields[f].MinZ),
+                    _valuesIntervals[f].Item1, _valuesIntervals[f].Item2,
+                    withStretch: StretchCheckBox.IsChecked);*/
+
+                Size funcS = new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ);
 
                 _fieldImageSources[f] = PaintService.CreateImageFromFunction(
                     new Size(FieldImage.Width, FieldImage.Height),
                     _fields[f].GetValue,
-                    new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ), new Point(_fields[f].MinR, _fields[f].MinZ),
+                    new Size(funcS.Width * scale, funcS.Height * scale), new Point(funcS.Width * posX + _fields[f].MinR, funcS.Height *  posY + _fields[f].MinZ),
                     _valuesIntervals[f].Item1, _valuesIntervals[f].Item2,
                     withStretch: StretchCheckBox.IsChecked);
 
                 _grids[f] = PaintService.CreateBorders(
                     new Size(FieldImage.Width, FieldImage.Height),
-                    new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ), new Point(_fields[f].MinR, _fields[f].MinZ),
+                    new Size(funcS.Width * scale, funcS.Height * scale), new Point(funcS.Width * posX + _fields[f].MinR, funcS.Height * posY + _fields[f].MinZ),
                     _fields[f].Vertices,
                     withStretch: StretchCheckBox.IsChecked);
 
@@ -145,6 +166,9 @@ namespace TensionFields
 
             if (GridCheckBox.IsChecked == true)
                 ShowGrid();
+
+            //FieldCanvas.Width = 800;
+            //FieldCanvas.Height = 580;
         }
 
         private void ShowGrid()
