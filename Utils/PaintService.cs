@@ -119,6 +119,7 @@ namespace TensionFields.Utils
                         CreatePoint(segments[r, z].RightBottom, transform),},
                         Fill = CreateBrushByValue(minValue, maxValue, segments[r, z].GetValue() ?? 0, colorExp: colorExp),
                         Visibility = Visibility.Hidden,
+                        RenderTransform = new ScaleTransform(),
                     });
             return polygons;
         }
@@ -171,6 +172,7 @@ namespace TensionFields.Utils
                 X2 = transform?.ReverseX(end.X) ?? end.X,
                 Y2 = transform?.ReverseY(end.Y) ?? end.Y,
                 Visibility = Visibility.Hidden,
+                RenderTransform = new ScaleTransform(),
             };
         }
     }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TensionFields"
         mc:Ignorable="d"
-        Title="MainWindow" Width="850" Height="800">
+        Title="MainWindow" Width="900" Height="800">
     <Grid>
         <Button
             Content="Открыть файл" 
@@ -38,13 +38,12 @@
         </Canvas>
         <GroupBox
             Header="График"
-            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,80,0,0"
-            Width="810" Height="610">
+            HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,80,0,0"
+            Width="880" Height="610">
             <Canvas x:Name="FieldCanvas"
-                Width="800" Height="580" Margin="-3,0,1,0">
-                <Image x:Name="FieldImage"
-                   Width="800" Height="580"/>
-            </Canvas>
+                    Width="870" Height="590"
+                    ClipToBounds="True"/>
+
         </GroupBox>
         <CheckBox x:Name="GridCheckBox"
                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,10,0,0"
@@ -61,6 +60,12 @@
                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="480,55,0,0" 
                  Width="50" Height="20"
                  TextWrapping="Wrap" Text="0"/>
+        <Button
+            Content="↻"
+            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="535,30,0,0"
+            Width="40" Height="45"
+            FontSize="30"
+            Click="ChangeScale"/>
         <CheckBox x:Name="StretchCheckBox"
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="600,10,0,0"
             Content="Растягивать график" Click="GridCheck"/>
@@ -70,6 +75,12 @@
         <CheckBox x:Name="ColorCheckBox"
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="600,50,0,0"
             Content="Шкала: (min, max) / (-max, max)"/>
+        <Button
+            Content="↻"
+            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="795,10,0,0"
+            Width="50" Height="55"
+            FontSize="30"
+            Click="ChangeScale"/>
 
 
     </Grid>

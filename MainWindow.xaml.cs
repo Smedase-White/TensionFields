@@ -26,9 +26,10 @@ namespace TensionFields
     public partial class MainWindow : Window
     {
         private Field[] _fields;
-        //private ImageSource[] _fieldImageSources;
+
         private List<Polygon>[] _fieldsPolygons;
-        private List<Line>[] _grids; 
+        private List<Line>[] _grids;
+
         private int _currentField;
 
         private (double, double)[] _valuesIntervals;
@@ -37,7 +38,6 @@ namespace TensionFields
         {
             InitializeComponent();
             _fields = Array.Empty<Field>();
-            //_fieldImageSources = Array.Empty<ImageSource>();
             _currentField = 0;
             Palette.Source = PaintService.CreateImageFromFunction(
                 new Size(Palette.Width, Palette.Height),
@@ -45,14 +45,6 @@ namespace TensionFields
                 new Size(2, 1), new Point(-1, 0),
                 -1, 1,
                 withStretch: true);
-            try
-            {
-                FieldImage.Source = new BitmapImage(new Uri("C:\\Users\\watei\\Downloads\\smeshariki.jpeg"));
-            }
-            catch
-            {
-                
-            }
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)
@@ -63,7 +55,6 @@ namespace TensionFields
 
             FieldCanvas.Children.Clear();
 
-            //_fieldImageSources = new ImageSource[_fields.Length];
             _fieldsPolygons = new List<Polygon>[_fields.Length];
             _grids = new List<Line>[_fields.Length];
             _valuesIntervals = new (double, double)[_fields.Length];
@@ -100,25 +91,21 @@ namespace TensionFields
                 }
             }
 
-            double scale = Convert.ToDouble(Scale.Text);
-            double posX = Convert.ToDouble(PosX.Text);
-            double posY = Convert.ToDouble(PosY.Text);
-
             for (int f = 0; f < _fields.Length; f++)
             {
                 Size funcS = new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ);
 
                 _fieldsPolygons[f] = PaintService.CreateSegments(
-                    new Size(FieldImage.Width, FieldImage.Height),
-                    new Size(funcS.Width * scale, funcS.Height * scale), new Point(funcS.Width * posX + _fields[f].MinR, funcS.Height * posY + _fields[f].MinZ),
+                    new Size(FieldCanvas.Width, FieldCanvas.Height),
+                    new Size(funcS.Width, funcS.Height), new Point(_fields[f].MinR, _fields[f].MinZ),
                     _fields[f].Segments,
                     _valuesIntervals[f].Item1, _valuesIntervals[f].Item2,
                     withStretch: StretchCheckBox.IsChecked
                     );
 
                 _grids[f] = PaintService.CreateBorders(
-                    new Size(FieldImage.Width, FieldImage.Height),
-                    new Size(funcS.Width * scale, funcS.Height * scale), new Point(funcS.Width * posX + _fields[f].MinR, funcS.Height * posY + _fields[f].MinZ),
+                    new Size(FieldCanvas.Width, FieldCanvas.Height),
+                    new Size(funcS.Width, funcS.Height), new Point(_fields[f].MinR, _fields[f].MinZ),
                     _fields[f].Vertices,
                     withStretch: StretchCheckBox.IsChecked);
 
@@ -203,6 +190,31 @@ namespace TensionFields
                 ShowCurrentGrid();
             else
                 HideCurrentGrid();
+        }
+
+        private void ChangeScale(object sender, RoutedEventArgs e)
+        {
+            double scale = Convert.ToDouble(Scale.Text);
+            double posX = Convert.ToDouble(PosX.Text);
+            double posY = Convert.ToDouble(PosY.Text);
+
+            for (int i = 0; i < _fields.Length; i++)
+            {
+                foreach (Polygon polygon in _fieldsPolygons[i])
+                {
+                    ((ScaleTransform)polygon.RenderTransform).ScaleX = scale;
+                    ((ScaleTransform)polygon.RenderTransform).ScaleY = scale;
+                    ((ScaleTransform)polygon.RenderTransform).CenterX = posX * FieldCanvas.Width;
+                    ((ScaleTransform)polygon.RenderTransform).CenterY = posY * FieldCanvas.Height;
+                }
+                foreach (Line line in _grids[i])
+                {
+                    ((ScaleTransform)line.RenderTransform).ScaleX = scale;
+                    ((ScaleTransform)line.RenderTransform).ScaleY = scale;
+                    ((ScaleTransform)line.RenderTransform).CenterX = posX * FieldCanvas.Width;
+                    ((ScaleTransform)line.RenderTransform).CenterY = posY * FieldCanvas.Height;
+                }
+            }
         }
     }
 }
