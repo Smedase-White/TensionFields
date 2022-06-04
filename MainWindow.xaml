@@ -75,12 +75,6 @@
         <CheckBox x:Name="ColorCheckBox"
             HorizontalAlignment="Left" VerticalAlignment="Top" Margin="600,50,0,0"
             Content="Шкала: (min, max) / (-max, max)"/>
-        <Button
-            Content="↻"
-            HorizontalAlignment="Left" VerticalAlignment="Top" Margin="795,10,0,0"
-            Width="50" Height="55"
-            FontSize="30"
-            Click="ChangeScale"/>
 
 
     </Grid>
