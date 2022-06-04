@@ -90,6 +90,11 @@ namespace TensionFields.API
             return intersection < x;
         }
 
+        public double? GetValue()
+        {
+            return _function((_vertices[0].X + _vertices[2].X) / 2, (_vertices[1].Y + _vertices[3].Y) / 2);
+        }
+
         public double? GetValue(double x, double y)
         {
             /*if (HasPoint(x, y) == false)

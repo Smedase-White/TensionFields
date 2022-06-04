@@ -14,6 +14,8 @@ namespace TensionFields.API
 
         private readonly int _N, _M;
 
+        private (int, int)? LastFoundSegment;
+
         public double MaxR { get; private set; }
         public double MinR { get; private set; }
 
@@ -118,9 +120,21 @@ namespace TensionFields.API
             double xp = 1 - (x - MinR) / (MaxR - MinR);
             double yp = 1 - (y - MinZ) / (MaxZ - MinZ);
 
-            (int, int)? segment = FindSegment(x, y, (int)((_N - 1) * xp), (int)((_M - 1) * yp));
+            int r = (int)((_N - 1) * xp);
+            int z = (int)((_M - 1) * yp);
+
+            if (LastFoundSegment != null)
+            {
+                if (Math.Abs(r - LastFoundSegment?.Item1 ?? 0) > _N / 2)
+                    LastFoundSegment = null;
+                if (Math.Abs(z - LastFoundSegment?.Item2 ?? 0) > _M / 2)
+                    LastFoundSegment = null;
+            }
+
+            (int, int)? segment = FindSegment(x, y, LastFoundSegment?.Item1 ?? r, LastFoundSegment?.Item2 ?? z);
             if (segment == null)
                 return null;
+            LastFoundSegment = segment;
             return _segments[segment.Value.Item1, segment.Value.Item2].GetValue(x, y);
         }
     }

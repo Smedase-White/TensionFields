@@ -10,6 +10,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using TensionFields.API;
+
 namespace TensionFields.Utils
 {
     public static class PaintService
@@ -45,7 +47,8 @@ namespace TensionFields.Utils
             }
         }
 
-        public static ImageSource CreateImageFromFunction(Size imageSize, function func, Size funcS, Point funcP, double minValue, double maxValue, double? graphShift = null, double? colorExc = null, bool? withStretch = null, System.Drawing.Color? background = null)
+        public static ImageSource CreateImageFromFunction(Size imageSize, function func, Size funcS, Point funcP, double minValue, double maxValue,
+            double? graphShift = null, bool? withStretch = null, double? colorExp = null, System.Drawing.Color? background = null)
         {
             WriteableBitmap writeableBitmap = new WriteableBitmap(
                 (int)imageSize.Width, (int)imageSize.Height,
@@ -58,9 +61,9 @@ namespace TensionFields.Utils
             trasnformFunction transformValue = (double value) =>
             {
                 double relative = 2 * (value - minValue) / (maxValue - minValue) - 1;
-                if (colorExc == null || colorExc == 1)
+                if (colorExp == null || colorExp == 1)
                     return relative;
-                return Math.Sign(relative) * Math.Pow(Math.Sign(relative) * relative, colorExc.Value);
+                return Math.Sign(relative) * Math.Pow(Math.Sign(relative) * relative, colorExp.Value);
             };
 
             int backgroundNum = (background?.R << 16 | background?.G << 8 | background?.B << 0) ?? int.MaxValue;
@@ -99,7 +102,29 @@ namespace TensionFields.Utils
             return writeableBitmap;
         }
 
-        public static List<Line> CreateBorders(Size imageSize, Size pointsS, Point pointsP, Point[,] points, double? graphShift = null, bool? withStretch = null)
+        public static List<Polygon> CreateSegments(Size imageSize, Size segmentsS, Point segmentsP, Segment[,] segments, double minValue, double maxValue,
+            double? graphShift = null, bool? withStretch = null, double? colorExp = null)
+        {
+            Transform transform = new Transform(imageSize, segmentsS, segmentsP, graphShift, withStretch);
+
+            List<Polygon> polygons = new List<Polygon>();
+            for (int r = 0; r < segments.GetLength(0); r++)
+                for (int z = 0; z < segments.GetLength(1); z++)
+                    polygons.Add(new Polygon()
+                    {
+                        Points = new PointCollection() {
+                        CreatePoint(segments[r, z].RightTop, transform),
+                        CreatePoint(segments[r, z].LeftTop, transform),
+                        CreatePoint(segments[r, z].LeftBottom, transform),
+                        CreatePoint(segments[r, z].RightBottom, transform),},
+                        Fill = CreateBrushByValue(minValue, maxValue, segments[r, z].GetValue() ?? 0, colorExp: colorExp),
+                        Visibility = Visibility.Hidden,
+                    });
+            return polygons;
+        }
+
+        public static List<Line> CreateBorders(Size imageSize, Size pointsS, Point pointsP, Point[,] points, 
+            double? graphShift = null, bool? withStretch = null)
         {
             Transform transform = new Transform(imageSize, pointsS, pointsP, graphShift, withStretch);
 
@@ -113,6 +138,27 @@ namespace TensionFields.Utils
                             CreateLine(points[r, z + 1], points[r, z], transform),
                         });
             return lines;
+        }
+
+        private static Brush CreateBrushByValue(double minValue, double maxValue, double currentValue, double? colorExp = null)
+        {
+            double relativeValue = 2 * (currentValue - minValue) / (maxValue - minValue) - 1;
+            relativeValue = Math.Sign(relativeValue) * Math.Pow(Math.Sign(relativeValue) * relativeValue, colorExp ?? 1);
+            Color color;
+            if (relativeValue < 0)
+                color = Color.FromRgb(0, (byte)(255 * (1 + relativeValue)), (byte)(255 * -relativeValue));
+            else
+                color = Color.FromRgb((byte)(255 * relativeValue), (byte)(255 * (1 - relativeValue)), 0);
+            return new SolidColorBrush(color);
+        }
+
+        private static Point CreatePoint(Point point, Transform? transform)
+        {
+            return new Point()
+            {
+                X = transform?.ReverseX(point.X) ?? point.X,
+                Y = transform?.ReverseY(point.Y) ?? point.Y,
+            };
         }
 
         private static Line CreateLine(Point begin, Point end, Transform? transform)

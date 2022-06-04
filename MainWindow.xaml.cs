@@ -26,7 +26,8 @@ namespace TensionFields
     public partial class MainWindow : Window
     {
         private Field[] _fields;
-        private ImageSource[] _fieldImageSources;
+        //private ImageSource[] _fieldImageSources;
+        private List<Polygon>[] _fieldsPolygons;
         private List<Line>[] _grids; 
         private int _currentField;
 
@@ -36,7 +37,7 @@ namespace TensionFields
         {
             InitializeComponent();
             _fields = Array.Empty<Field>();
-            _fieldImageSources = Array.Empty<ImageSource>();
+            //_fieldImageSources = Array.Empty<ImageSource>();
             _currentField = 0;
             Palette.Source = PaintService.CreateImageFromFunction(
                 new Size(Palette.Width, Palette.Height),
@@ -60,11 +61,10 @@ namespace TensionFields
             if (openFileDialog.ShowDialog() == true)
                 _fields = TextFileParser.Parse(openFileDialog.FileName);
 
-            if (GridCheckBox.IsChecked == true)
-                HideGrid();
+            FieldCanvas.Children.Clear();
 
-
-            _fieldImageSources = new ImageSource[_fields.Length];
+            //_fieldImageSources = new ImageSource[_fields.Length];
+            _fieldsPolygons = new List<Polygon>[_fields.Length];
             _grids = new List<Line>[_fields.Length];
             _valuesIntervals = new (double, double)[_fields.Length];
 
@@ -106,22 +106,15 @@ namespace TensionFields
 
             for (int f = 0; f < _fields.Length; f++)
             {
-
-                /*_fieldImageSources[f] = PaintService.CreateImageFromFunction(
-                    new Size(FieldImage.Width, FieldImage.Height),
-                    _fields[f].GetValue,
-                    new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ), new Point(_fields[f].MinR, _fields[f].MinZ),
-                    _valuesIntervals[f].Item1, _valuesIntervals[f].Item2,
-                    withStretch: StretchCheckBox.IsChecked);*/
-
                 Size funcS = new Size(_fields[f].MaxR - _fields[f].MinR, _fields[f].MaxZ - _fields[f].MinZ);
 
-                _fieldImageSources[f] = PaintService.CreateImageFromFunction(
+                _fieldsPolygons[f] = PaintService.CreateSegments(
                     new Size(FieldImage.Width, FieldImage.Height),
-                    _fields[f].GetValue,
-                    new Size(funcS.Width * scale, funcS.Height * scale), new Point(funcS.Width * posX + _fields[f].MinR, funcS.Height *  posY + _fields[f].MinZ),
+                    new Size(funcS.Width * scale, funcS.Height * scale), new Point(funcS.Width * posX + _fields[f].MinR, funcS.Height * posY + _fields[f].MinZ),
+                    _fields[f].Segments,
                     _valuesIntervals[f].Item1, _valuesIntervals[f].Item2,
-                    withStretch: StretchCheckBox.IsChecked);
+                    withStretch: StretchCheckBox.IsChecked
+                    );
 
                 _grids[f] = PaintService.CreateBorders(
                     new Size(FieldImage.Width, FieldImage.Height),
@@ -129,21 +122,20 @@ namespace TensionFields
                     _fields[f].Vertices,
                     withStretch: StretchCheckBox.IsChecked);
 
+                foreach (Polygon polygon in _fieldsPolygons[f])
+                    FieldCanvas.Children.Add(polygon);
+
                 foreach (Line line in _grids[f])
                     FieldCanvas.Children.Add(line);
             }
-            _currentField = 0;
-            DrawField();
+            ChangeField(-1, 0);
         }
 
         private void PrevTime(object sender, RoutedEventArgs e)
         {
             if (_currentField <= 0)
                 return;
-            if (GridCheckBox.IsChecked == true)
-                HideGrid();
-            _currentField--;
-            DrawField();
+            ChangeField(_currentField, _currentField - 1);
         }
 
 
@@ -151,50 +143,66 @@ namespace TensionFields
         {
             if (_currentField >= _fields.Length - 1)
                 return;
-            if (GridCheckBox.IsChecked == true)
-                HideGrid();
-            _currentField++;
-            DrawField();
+            ChangeField(_currentField, _currentField + 1);
         }
 
-        public void DrawField()
+        public void ChangeField(int oldF, int newF)
         {
-            FieldImage.Source = _fieldImageSources[_currentField];
+            if (oldF != -1)
+            {
+                _currentField = oldF;
+                HideCurrentField();
+                if (GridCheckBox.IsChecked == true)
+                    HideCurrentGrid();
+            }
+
+            _currentField = newF;
+            ShowCurrentField();
+            if (GridCheckBox.IsChecked == true)
+                ShowCurrentGrid();
 
             PaletteMinLabel.Content = $"{_valuesIntervals[_currentField].Item1:0.0000}";
             PaletteMaxLabel.Content = $"{_valuesIntervals[_currentField].Item2:0.0000}";
-
-            if (GridCheckBox.IsChecked == true)
-                ShowGrid();
-
-            //FieldCanvas.Width = 800;
-            //FieldCanvas.Height = 580;
         }
 
-        private void ShowGrid()
+        private void ShowCurrentField()
+        {
+            if (_fieldsPolygons == null)
+                return;
+            foreach (Polygon polygon in _fieldsPolygons[_currentField])
+                polygon.Visibility = Visibility.Visible;
+        }
+
+        private void HideCurrentField()
+        {
+            if (_fieldsPolygons == null)
+                return;
+            foreach (Polygon polygon in _fieldsPolygons[_currentField])
+                polygon.Visibility = Visibility.Hidden;
+        }
+
+        private void ShowCurrentGrid()
         {
             if (_grids == null)
                 return;
-            List<Line> lines = _grids[_currentField];
-            foreach (Line line in lines)
+            foreach (Line line in _grids[_currentField])
                 line.Visibility = Visibility.Visible;
         }
 
-        private void HideGrid()
+        private void HideCurrentGrid()
         {
             if (_grids == null)
                 return;
-            List<Line> lines = _grids[_currentField];
-            foreach (Line line in lines)
+            foreach (Line line in _grids[_currentField])
                 line.Visibility = Visibility.Hidden;
         }
 
         private void GridCheck(object sender, RoutedEventArgs e)
         {
             if (GridCheckBox.IsChecked == true)
-                ShowGrid();
+                ShowCurrentGrid();
             else
-                HideGrid();
+                HideCurrentGrid();
         }
     }
 }
