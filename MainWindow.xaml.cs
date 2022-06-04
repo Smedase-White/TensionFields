@@ -28,7 +28,6 @@ namespace TensionFields
         private Field[] _fields;
 
         private List<Polygon>[] _fieldsPolygons;
-        private List<Line>[] _grids;
 
         private int _currentField;
 
@@ -56,7 +55,6 @@ namespace TensionFields
             FieldCanvas.Children.Clear();
 
             _fieldsPolygons = new List<Polygon>[_fields.Length];
-            _grids = new List<Line>[_fields.Length];
             _valuesIntervals = new (double, double)[_fields.Length];
 
             if (SameCheckBox.IsChecked == true)
@@ -103,17 +101,8 @@ namespace TensionFields
                     withStretch: StretchCheckBox.IsChecked
                     );
 
-                _grids[f] = PaintService.CreateBorders(
-                    new Size(FieldCanvas.Width, FieldCanvas.Height),
-                    new Size(funcS.Width, funcS.Height), new Point(_fields[f].MinR, _fields[f].MinZ),
-                    _fields[f].Vertices,
-                    withStretch: StretchCheckBox.IsChecked);
-
                 foreach (Polygon polygon in _fieldsPolygons[f])
                     FieldCanvas.Children.Add(polygon);
-
-                foreach (Line line in _grids[f])
-                    FieldCanvas.Children.Add(line);
             }
             ChangeField(-1, 0);
         }
@@ -139,14 +128,14 @@ namespace TensionFields
             {
                 _currentField = oldF;
                 HideCurrentField();
-                if (GridCheckBox.IsChecked == true)
-                    HideCurrentGrid();
             }
 
             _currentField = newF;
             ShowCurrentField();
             if (GridCheckBox.IsChecked == true)
                 ShowCurrentGrid();
+            else
+                HideCurrentGrid();
 
             PaletteMinLabel.Content = $"{_valuesIntervals[_currentField].Item1:0.0000}";
             PaletteMaxLabel.Content = $"{_valuesIntervals[_currentField].Item2:0.0000}";
@@ -170,18 +159,18 @@ namespace TensionFields
 
         private void ShowCurrentGrid()
         {
-            if (_grids == null)
+            if (_fieldsPolygons == null)
                 return;
-            foreach (Line line in _grids[_currentField])
-                line.Visibility = Visibility.Visible;
+            foreach (Polygon polygon in _fieldsPolygons[_currentField])
+                polygon.Stroke = Brushes.Gray;
         }
 
         private void HideCurrentGrid()
         {
-            if (_grids == null)
+            if (_fieldsPolygons == null)
                 return;
-            foreach (Line line in _grids[_currentField])
-                line.Visibility = Visibility.Hidden;
+            foreach (Polygon polygon in _fieldsPolygons[_currentField])
+                polygon.Stroke = polygon.Fill;
         }
 
         private void GridCheck(object sender, RoutedEventArgs e)
@@ -206,13 +195,6 @@ namespace TensionFields
                     ((ScaleTransform)polygon.RenderTransform).ScaleY = scale;
                     ((ScaleTransform)polygon.RenderTransform).CenterX = posX * FieldCanvas.Width;
                     ((ScaleTransform)polygon.RenderTransform).CenterY = posY * FieldCanvas.Height;
-                }
-                foreach (Line line in _grids[i])
-                {
-                    ((ScaleTransform)line.RenderTransform).ScaleX = scale;
-                    ((ScaleTransform)line.RenderTransform).ScaleY = scale;
-                    ((ScaleTransform)line.RenderTransform).CenterX = posX * FieldCanvas.Width;
-                    ((ScaleTransform)line.RenderTransform).CenterY = posY * FieldCanvas.Height;
                 }
             }
         }

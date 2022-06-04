@@ -47,7 +47,7 @@
         </GroupBox>
         <CheckBox x:Name="GridCheckBox"
                   HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,10,0,0"
-                  Content="Отоброжать сетку" Click="GridCheck"/>
+                  Content="Отоброжать сетку" Click="GridCheck" IsChecked="True"/>
         <TextBox x:Name="Scale"
                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="425,30,0,0" 
                  Width="105" Height="20"

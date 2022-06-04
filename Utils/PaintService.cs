@@ -118,27 +118,11 @@ namespace TensionFields.Utils
                         CreatePoint(segments[r, z].LeftBottom, transform),
                         CreatePoint(segments[r, z].RightBottom, transform),},
                         Fill = CreateBrushByValue(minValue, maxValue, segments[r, z].GetValue() ?? 0, colorExp: colorExp),
+                        Stroke = Brushes.Gray,
                         Visibility = Visibility.Hidden,
                         RenderTransform = new ScaleTransform(),
                     });
             return polygons;
-        }
-
-        public static List<Line> CreateBorders(Size imageSize, Size pointsS, Point pointsP, Point[,] points, 
-            double? graphShift = null, bool? withStretch = null)
-        {
-            Transform transform = new Transform(imageSize, pointsS, pointsP, graphShift, withStretch);
-
-            List<Line> lines = new List<Line>();
-            for (int r = 0; r < points.GetLength(0) - 1; r++)
-                for (int z = 0; z < points.GetLength(1) - 1; z++)
-                    lines.AddRange(new Line[] {
-                            CreateLine(points[r, z], points[r + 1, z], transform),
-                            CreateLine(points[r + 1, z], points[r + 1, z + 1], transform),
-                            CreateLine(points[r + 1, z + 1], points[r, z + 1], transform),
-                            CreateLine(points[r, z + 1], points[r, z], transform),
-                        });
-            return lines;
         }
 
         private static Brush CreateBrushByValue(double minValue, double maxValue, double currentValue, double? colorExp = null)
@@ -159,20 +143,6 @@ namespace TensionFields.Utils
             {
                 X = transform?.ReverseX(point.X) ?? point.X,
                 Y = transform?.ReverseY(point.Y) ?? point.Y,
-            };
-        }
-
-        private static Line CreateLine(Point begin, Point end, Transform? transform)
-        {
-            return new Line()
-            {
-                Stroke = Brushes.Gray,
-                X1 = transform?.ReverseX(begin.X) ?? begin.X,
-                Y1 = transform?.ReverseY(begin.Y) ?? begin.Y,
-                X2 = transform?.ReverseX(end.X) ?? end.X,
-                Y2 = transform?.ReverseY(end.Y) ?? end.Y,
-                Visibility = Visibility.Hidden,
-                RenderTransform = new ScaleTransform(),
             };
         }
     }
